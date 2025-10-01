@@ -8,45 +8,43 @@
   <link rel="stylesheet" href="/css/nav.css">
 </head>
 
-<header class="d-flex flex-wrap py-3 nav-bg fixed-top px-5">
-    <ul class="nav nav-pills">
-      <div class="notMobile">
-          <a href="/" class="d-flex mb-3 mb-md-0 fs-1 text-dark text-decoration-none">After Dark Quotes</a>
-          {{!-- Removing image and replacing it with text instead. <img src="/img/JC-logo.png" alt="JCE Logo" width="auto" height="40px"> --}}
-          </a>
-      </div>
-    </ul>
-
-    <ul class="nav nav-pills justify-content-center me-md-auto">
-        <div class="mobile">
-            <nav class="nav-bg navbar-light d-flex align-items-center">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-            </nav>
+<header class="nav-bg fixed-top">
+    <nav class="navbar navbar-expand-md navbar-light py-3 px-5">
+        <!-- Desktop Title -->
+        <div class="notMobile">
+            <a href="/" class="navbar-brand fs-1 text-dark text-decoration-none">After Dark Quotes</a>
         </div>
-    </ul>
-    <ul class="nav nav-pills">
-        <li class="notMobile nav-item"><a href="/" class="nav-link" aria-current="page">Home</a></li>
-        <li class="notMobile nav-item"><a href="/rate" class="nav-link">Rate Quotes</a></li>
-        {{#if isAdmin}}
-        <li class="notMobile nav-item"><a href="/limbo" class="nav-link">Approve Quotes</a></li>
-        {{/if}}
-        <li class="notMobile nav-item"><a href="/leaderboard" class="nav-link">Leaderboards</a></li>
-        <li class="notMobile nav-item"><a href="/logout" class="nav-link text-danger">Logout</a></li>
-    </ul>
-    <div class="mobile pt-3">
-      <div class="collapse" id="navbarToggleExternalContent">
-            <ul class="nav me-auto nav-pills">
-              <li class="nav-item"><a href="/rate" class="nav-link">Rate Quotes</a></li>
-              {{#if isAdmin}}
-              <li class="nav-item"><a href="/limbo" class="nav-link">Approve Quotes</a></li>
-              {{/if}}
-              <li class="nav-item"><a href="/leaderboard" class="nav-link">Leaderboards</a></li>
-              <li class="nav-item"><a href="/logout" class="nav-link text-danger">Logout</a></li>
-          </ul>
-      </div>
-  </div>
+
+        <!-- Mobile Hamburger Button -->
+        <div class="mobile">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+
+        <!-- Desktop Navigation -->
+        <ul class="nav nav-pills ms-auto notMobile">
+            <li class="nav-item"><a href="/" class="nav-link" aria-current="page">Home</a></li>
+            <li class="nav-item"><a href="/rate" class="nav-link">Rate Quotes</a></li>
+            {{#if isAdmin}}
+            <li class="nav-item"><a href="/limbo" class="nav-link">Approve Quotes</a></li>
+            {{/if}}
+            <li class="nav-item"><a href="/leaderboard" class="nav-link">Leaderboards</a></li>
+            <li class="nav-item"><a href="/logout" class="nav-link text-danger">Logout</a></li>
+        </ul>
+
+        <!-- Mobile Navigation (Collapsible) -->
+        <div class="collapse navbar-collapse mobile" id="navbarToggleExternalContent">
+            <ul class="nav flex-column nav-pills mt-3">
+                <li class="nav-item"><a href="/rate" class="nav-link">Rate Quotes</a></li>
+                {{#if isAdmin}}
+                <li class="nav-item"><a href="/limbo" class="nav-link">Approve Quotes</a></li>
+                {{/if}}
+                <li class="nav-item"><a href="/leaderboard" class="nav-link">Leaderboards</a></li>
+                <li class="nav-item"><a href="/logout" class="nav-link text-danger">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
 </header>
 
 <style>
