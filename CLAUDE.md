@@ -29,7 +29,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `afterdark-quotes`: Main quotes storage
 - `afterdark-quote-ratings`: User ratings for quotes
 - `limbo-afterdark-quotes`: Pending quotes awaiting approval
-- `afterdark_quotes_members`: User/member information
+- `afterdark-auth-tokens`: Authentication tokens with user information (discord_id, username, display_name)
+- ~~`afterdark_quotes_members`~~: *DEPRECATED* - User info now stored in auth tokens
 
 ### Key Features
 - **Quote Rating System**: Users can rate quotes 1-10 with slider interface and confetti celebration

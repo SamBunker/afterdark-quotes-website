@@ -14,7 +14,6 @@ const dynamoClient = new AWS.DynamoDB.DocumentClient({
 const QUOTES_TABLE_NAME = "afterdark-quotes";
 const QUOTE_RATING = 'afterdark-quote-ratings';
 const LIMBO_TABLE_NAME = 'limbo-afterdark-quotes-updated';
-const MEMBER_TABLE = 'afterdark_quotes_members';
 const AUTH_TOKENS_TABLE = 'afterdark-auth-tokens';
 
 
@@ -26,14 +25,7 @@ const AUTH_TOKENS_TABLE = 'afterdark-auth-tokens';
 //     return await dynamoClient.put(params).promise();
 // }
 
-// Fetching all Users for /identity
-const getUsers = async () => {
-    const params = {
-        TableName: MEMBER_TABLE,
-    };
-    const quotes = await dynamoClient.scan(params).promise();
-    return quotes['Items'];
-}
+// User data is now stored in auth tokens table - members table deprecated
 
 // Quote Rating System
 const getQuote = async (message_id) => {
@@ -249,13 +241,15 @@ const updateQuoteRating = async (message_id, updatedRatings) => {
 
 // Authentication Token Management
 
-const createAuthToken = async (token, discord_id) => {
+const createAuthToken = async (token, discord_id, username, display_name) => {
     const now = new Date();
-    const expiresAt = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour expiry
+    const expiresAt = new Date(now.getTime() + 8 * 60 * 60 * 1000); // 8 hour expiry
 
     const tokenData = {
         token: token,
         discord_id: Number(discord_id),
+        username: username,
+        display_name: display_name,
         created_at: now.toISOString(),
         expires_at: expiresAt.toISOString(),
         used: false
@@ -416,7 +410,6 @@ module.exports = {
     getQuoteRating,
     fetchQuoteRating,
     updateQuoteRating,
-    getUsers,
     createAuthToken,
     getAuthToken,
     markTokenAsUsed,

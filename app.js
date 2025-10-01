@@ -3,7 +3,7 @@ const { engine } = require('express-handlebars');
 var app = express();
 var handlebars = require('express-handlebars').create({defaultLayout: 'main'});
 const bodyParser = require('body-parser');
-const { getAllQuotes, getQuotesLimited, deleteQuote, getQuote, addOrUpdateQuote, getRandomQuote, addOrUpdateQuoteRating, getLimboQuotes, deleteLimboQuote, addOrUpdateLimboQuote, getLimboQuote, getQuoteRating, fetchQuoteRating, updateQuoteRating, getUsers, validateAuthToken, markTokenAsUsed } = require('./dynamo');
+const { getAllQuotes, getQuotesLimited, deleteQuote, getQuote, addOrUpdateQuote, getRandomQuote, addOrUpdateQuoteRating, getLimboQuotes, deleteLimboQuote, addOrUpdateLimboQuote, getLimboQuote, getQuoteRating, fetchQuoteRating, updateQuoteRating, validateAuthToken, markTokenAsUsed } = require('./dynamo');
 const fs = require('fs');
 const path = require('path');
 const User = require('./models/user');
@@ -37,68 +37,24 @@ app.use(session({
   }
 }));
 
-function isPasswordValid(req, res, next) {
-  if (req.session.passwordAuthenticated) {
-    next();
-  } else {
-    res.redirect('/password');
-  }
-}
-
-function isUserValid(req, res, next) {
+function requireAuth(req, res, next) {
   try {
-      if (!req.session.user || typeof req.session.user !== 'object') {
+      if (!req.session.user || typeof req.session.user !== 'object' || !req.session.user.userId) {
           throw new Error('Invalid user session!');
       }
       next();
   } catch (error) {
       console.error(error.message);
-      res.status(401).redirect('/identity');
+      res.status(401).redirect('/unauthorized');
   }
 }
 
-app.get('/password', (req, res) => {
-  if (req.session.passwordAuthenticated) {
-    return res.redirect('/');
-  }
-  res.render('password', { error: null });
-});
-
-app.post('/password', (req, res) => {
-  const { password } = req.body;
-  const correctPassword = process.env.SITE_PASSWORD || 'yourpassword';
-
-  if (password === correctPassword) {
-    req.session.passwordAuthenticated = true;
-    res.redirect('/');
-  } else {
-    res.render('password', { error: 'Incorrect password. Please try again.' });
-  }
-});
-
-app.get('/identity', isPasswordValid, async (req, res) => {
-  try {
-    const users = await getUsers();
-    const names = users.map(user => ({ id: user.discord_id, nickname: user.nickname })); 
-    res.render('identity', { names });
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    res.status(500).send('Error retrieving users');
-  }
-});
-
-app.post('/identity', isPasswordValid, async (req, res) => {
-  const userId = req.body.userId;
-  const nickname = req.body.nickname; // Capture nickname from the form
-
-  req.session.user = { userId, nickname };
-  console.log(`User selected: ${nickname} (ID: ${userId})`); // Debugging
-
-  res.redirect('/rate');  // Redirect to /rate after setting the session
+app.get('/unauthorized', (req, res) => {
+  res.render('unauthorized');
 });
 
 // Token-based authentication route
-app.get('/auth/:token', isPasswordValid, async (req, res) => {
+app.get('/auth/:token', async (req, res) => {
   const token = req.params.token;
 
   try {
@@ -113,28 +69,19 @@ app.get('/auth/:token', isPasswordValid, async (req, res) => {
       });
     }
 
-    // Get user information from the members table
-    const users = await getUsers();
-    const user = users.find(u => u.discord_id === validation.data.discord_id);
-
-    if (!user) {
-      console.log(`User not found in members table: ${validation.data.discord_id}`);
-      return res.status(404).render('error', {
-        message: 'User Not Found',
-        details: 'Your Discord account is not registered in the system. Please contact an administrator.'
-      });
-    }
+    // Get user information from the token data (includes Discord username and display name)
+    const tokenData = validation.data;
 
     // Mark token as used
     await markTokenAsUsed(token);
 
-    // Create session (same as /identity POST)
+    // Create session using info from token
     req.session.user = {
-      userId: user.discord_id,
-      nickname: user.nickname
+      userId: tokenData.discord_id,
+      nickname: tokenData.display_name || tokenData.username
     };
 
-    console.log(`Token authentication successful for: ${user.nickname} (ID: ${user.discord_id})`);
+    console.log(`Token authentication successful for: ${tokenData.display_name || tokenData.username} (ID: ${tokenData.discord_id})`);
 
     // Redirect to rate page
     res.redirect('/rate');
@@ -148,14 +95,14 @@ app.get('/auth/:token', isPasswordValid, async (req, res) => {
   }
 });
 
-app.get('/rate', isPasswordValid, isUserValid, async (req, res) => {
+app.get('/rate', requireAuth, async (req, res) => {
   const username = req.session.user.nickname;
 
   const quote = await getRandomQuote();
   res.render('rate', { username, quote });
 })
 
-app.get('/leaderboard', isPasswordValid, async (req, res) => {
+app.get('/leaderboard', async (req, res) => {
   try {
     const quotes = await getAllQuotes(); // Fetch all quotes from DynamoDB
     res.render('leaderboard', { quotes }); // Pass quotes to the template
@@ -165,13 +112,13 @@ app.get('/leaderboard', isPasswordValid, async (req, res) => {
   }
 })
 
-app.get('/limbo', isPasswordValid, async (req, res) => {
+app.get('/limbo', requireAuth, async (req, res) => {
   const messages = await getLimboQuotes();
   console.log(messages);
   res.render('limbo', { messages });
 })
 
-app.get('/quote/:message_id', isPasswordValid, async (req, res) => {
+app.get('/quote/:message_id', async (req, res) => {
   try {
       const messageId = req.params.message_id; // Get the message_id from the URL
       console.log(`Fetching quote data for messageId: ${messageId}`);
@@ -238,7 +185,7 @@ app.get('/quote/:message_id', isPasswordValid, async (req, res) => {
 
 
 // Route to handle button clicks (Yes or No)
-app.post('/quote/:id', isPasswordValid, async (req, res) => {
+app.post('/quote/:id', requireAuth, async (req, res) => {
   // const messages = getLimboQuotes();
   const messageId = req.params.id;
   console.log("Without BigInt" + messageId);
@@ -354,22 +301,24 @@ app.post('/quote/:id', isPasswordValid, async (req, res) => {
 });
     
 
-app.get('/logout', isPasswordValid, (req, res) => {
+app.get('/logout', requireAuth, (req, res) => {
   req.session.user = "";
   console.log("User Logged Out.")
   res.redirect('/');
 });
 
 app.get('/reset', (req, res) => {
-  req.session.passwordAuthenticated = false;
   req.session.user = "";
-  console.log("Session reset - password authentication cleared.");
-  res.redirect('/password');
+  console.log("Session reset - user logged out.");
+  res.redirect('/unauthorized');
 });
 
 
 // Route to display messages
-app.get('/', isPasswordValid, (req, res) => {
+app.get('/', (req, res) => {
+  if (!req.session.user || !req.session.user.userId) {
+    return res.redirect('/unauthorized');
+  }
   res.render('home');
 });
 
