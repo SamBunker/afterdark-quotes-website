@@ -12,7 +12,7 @@ const session = require('express-session');
 const crypto = require('crypto');
 const secretKey = crypto.randomBytes(32).toString('hex');
 
-const port = 3000;
+const port = 3001;
 
 // Set up Handlebars as the template engine
 app.engine('handlebars', engine({

@@ -26,7 +26,7 @@ RUN npm install --legacy-peer-deps
 COPY . .
 
 # Step 8: Expose the port that the app will run on
-EXPOSE 3000
+EXPOSE 3001
 
 # Step 9: Define the command to run your application
 CMD ["node", "app.js"]
