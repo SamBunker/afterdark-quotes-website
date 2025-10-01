@@ -5,15 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Welcome to After Dark's Quoting Journal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Desktop: card effect */
+        @media (min-width: 768px) {
+            .rate-container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+            }
+            .rate-content {
+                max-width: 800px;
+                width: 100%;
+            }
+        }
+
+        /* Mobile: full screen, no card */
+        @media (max-width: 767px) {
+            body {
+                overflow-y: auto !important; /* Allow scrolling on mobile */
+            }
+            .rate-container {
+                padding: 1rem;
+            }
+            .rate-content {
+                width: 100%;
+                box-shadow: none !important;
+                padding: 1rem !important;
+            }
+        }
+    </style>
 </head>
 <body class="bg-light">
-    <div class="container d-flex justify-content-center align-items-center min-vh-100">
-        <div class="card shadow-lg p-4" style="max-width: 800px; width: 100%;">
+    <div class="container rate-container">
+        <div class="card shadow-lg p-4 rate-content">
             <h1 class="text-center">Rate That Quote! 🎪</h1>
             <i class="text-center mb-4">Signed in as {{username}}.</i>
 
             <blockquote class="blockquote text-center">
-                <p class="mb-3">"{{quote.content}}"</p>  <!-- Adjust key based on your DynamoDB schema -->
+                <p class="mb-3">{{quote.content}}</p>  <!-- Adjust key based on your DynamoDB schema -->
                 <footer class="blockquote-footer">{{quote.user}}</footer>
             </blockquote>
 

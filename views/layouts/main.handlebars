@@ -59,6 +59,13 @@
         overflow-y: hidden;
     }
 
+    /* Allow scrolling on mobile */
+    @media (max-width: 767px) {
+        body {
+            overflow-y: auto;
+        }
+    }
+
 </style>
 
 <body class="d-flex flex-column px-5">
