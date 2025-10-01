@@ -251,7 +251,7 @@ app.post('/quote/:id', requireAuth, async (req, res) => {
                   message_id: BigInt(messageId),
                   ratings: [
                       {
-                          sessionUserID: Number(sessionUserID),
+                          sessionUserID: sessionUserID.toString(), // Store as string to prevent precision loss
                           rating: Number(rating)
                       }
                   ]
@@ -278,14 +278,14 @@ app.post('/quote/:id', requireAuth, async (req, res) => {
                   // User exists, remove old rating and add new one
                   updatedRatings.splice(userIndex, 1); // Remove the old entry
                   updatedRatings.push({                // Add new entry at the end
-                      sessionUserID: Number(sessionUserID),
+                      sessionUserID: sessionUserID.toString(), // Store as string to prevent precision loss
                       rating: Number(rating)
                   });
                   console.log(`Replaced ${sessionUserID}'s rating with ${rating}`);
               } else {
                   // User does not exist, add a new rating
                   updatedRatings.push({
-                      sessionUserID: Number(sessionUserID),
+                      sessionUserID: sessionUserID.toString(), // Store as string to prevent precision loss
                       rating: Number(rating)
                   });
                   console.log(`Added new rating for ${sessionUserID}`);
