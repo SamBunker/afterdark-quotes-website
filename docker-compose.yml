@@ -3,7 +3,6 @@ version: '3.8'
 services:
   quotes-website:
     build: .
-    container_name: quotes-website
     ports:
       - "3001:3001"
     environment:
@@ -15,3 +14,9 @@ services:
     restart: unless-stopped
     volumes:
       - ./logs:/usr/src/app/logs
+    networks:
+      - d-nginx_default
+
+networks:
+  d-nginx_default:
+    external: true
