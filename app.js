@@ -360,6 +360,13 @@ app.get('/logout', isPasswordValid, (req, res) => {
   res.redirect('/');
 });
 
+app.get('/reset', (req, res) => {
+  req.session.passwordAuthenticated = false;
+  req.session.user = "";
+  console.log("Session reset - password authentication cleared.");
+  res.redirect('/password');
+});
+
 
 // Route to display messages
 app.get('/', isPasswordValid, (req, res) => {
