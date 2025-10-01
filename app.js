@@ -37,6 +37,12 @@ app.use(session({
   }
 }));
 
+// Middleware to add isAdmin to all views
+app.use((req, res, next) => {
+  res.locals.isAdmin = req.session.user?.accessLevel === 'admin';
+  next();
+});
+
 function requireAuth(req, res, next) {
   try {
       if (!req.session.user || typeof req.session.user !== 'object' || !req.session.user.userId) {
@@ -46,6 +52,24 @@ function requireAuth(req, res, next) {
   } catch (error) {
       console.error(error.message);
       res.status(401).redirect('/unauthorized');
+  }
+}
+
+function isAdmin(req, res, next) {
+  try {
+      if (!req.session.user || typeof req.session.user !== 'object' || !req.session.user.userId) {
+          throw new Error('Invalid user session!');
+      }
+      if (req.session.user.accessLevel !== 'admin') {
+          throw new Error('Insufficient permissions - admin access required');
+      }
+      next();
+  } catch (error) {
+      console.error(error.message);
+      res.status(403).render('error', {
+        message: 'Access Denied',
+        details: 'You do not have permission to access this page. Admin access is required.'
+      });
   }
 }
 
@@ -78,10 +102,11 @@ app.get('/auth/:token', async (req, res) => {
     // Create session using info from token
     req.session.user = {
       userId: tokenData.discord_id,
-      nickname: tokenData.display_name || tokenData.username
+      nickname: tokenData.display_name || tokenData.username,
+      accessLevel: tokenData.access_level || 'member' // Default to member if not specified
     };
 
-    console.log(`Token authentication successful for: ${tokenData.display_name || tokenData.username} (ID: ${tokenData.discord_id})`);
+    console.log(`Token authentication successful for: ${tokenData.display_name || tokenData.username} (ID: ${tokenData.discord_id}, Access: ${tokenData.access_level || 'member'})`);
 
     // Redirect to rate page
     res.redirect('/');
@@ -112,7 +137,7 @@ app.get('/leaderboard', async (req, res) => {
   }
 })
 
-app.get('/limbo', requireAuth, async (req, res) => {
+app.get('/limbo', isAdmin, async (req, res) => {
   const messages = await getLimboQuotes();
   console.log(messages);
   res.render('limbo', { messages });
