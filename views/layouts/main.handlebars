@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>After Dark</title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/nav.css">
+</head>
+
+<header class="d-flex flex-wrap py-3 nav-bg fixed-top px-5">
+    <ul class="nav nav-pills">
+      <div class="notMobile">
+          <a href="/" class="d-flex mb-3 mb-md-0 fs-1 text-dark text-decoration-none">After Dark Quotes</a>
+          {{!-- Removing image and replacing it with text instead. <img src="/img/JC-logo.png" alt="JCE Logo" width="auto" height="40px"> --}}
+          </a>
+      </div>
+    </ul>
+
+    <ul class="nav nav-pills justify-content-center me-md-auto">
+        <div class="mobile">
+            <nav class="nav-bg navbar-light d-flex align-items-center">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </nav>
+        </div>
+    </ul>
+    <ul class="nav nav-pills">
+        <li class="notMobile nav-item"><a href="/" class="nav-link" aria-current="page">Home</a></li>
+        <li class="notMobile nav-item"><a href="/rate" class="nav-link">Rate Quotes</a></li>
+        <li class="notMobile nav-item"><a href="/limbo" class="nav-link">Approve Quotes</a></li>
+        <li class="notMobile nav-item"><a href="/leaderboard" class="nav-link">Leaderboards</a></li>
+    </ul>
+    <div class="mobile pt-3">
+      <div class="collapse" id="navbarToggleExternalContent">
+            <ul class="nav me-auto nav-pills">
+              <li class="nav-item"><a href="/rate" class="nav-link">Rate Quotes</a></li>
+              <li class="nav-item"><a href="/limbo" class="nav-link">Approve Quotes</a></li>
+              <li class="nav-item"><a href="/leaderboard" class="nav-link">Leaderboards</a></li>
+          </ul>
+      </div>
+  </div>
+</header>
+
+<style>
+    body {
+        background-image: url('/img/wallpaper.png'); /* Adjust the path based on your project structure */
+        background-size: cover; /* Ensures the image covers the entire page */
+        background-position: center; /* Centers the image */
+        background-repeat: no-repeat; /* Prevents image repetition */
+        background-attachment: fixed; /* Keeps the background fixed while scrolling */
+        overflow-y: hidden;
+    }
+
+</style>
+
+<body class="d-flex flex-column px-5">
+  {{{body}}}
+  <script src="/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

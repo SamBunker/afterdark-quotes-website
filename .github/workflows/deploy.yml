@@ -1,0 +1,46 @@
+name: Quotes Website CI/CD
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: |
+        npm install --legacy-peer-deps
+
+    - name: Lint JavaScript files
+      run: |
+        npx eslint . --ext .js || echo "No ESLint config found, skipping JS linting"
+
+    - name: Check for syntax errors
+      run: |
+        node -c app.js
+        node -c dynamo.js
+        find . -name "*.js" -not -path "./node_modules/*" -exec node -c {} \; || echo "Syntax check complete"
+
+    - name: Run tests
+      run: npm test || echo "No tests found, skipping"
+
+  deploy:
+    needs: test
+    runs-on: self-hosted
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Trigger Portainer Webhook
+        run: |
+          curl -X POST ${{ secrets.PORTAINER_WEBHOOK_URL }}

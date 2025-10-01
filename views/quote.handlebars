@@ -1,0 +1,356 @@
+{{!-- Use the main layout for consistency --}}
+<div class="container-fluid d-flex justify-content-center align-items-center desktop-center" style="min-height: 100vh; padding-top: 80px; overflow-y: auto;">
+    <div class="card shadow-lg mobile-card" style="max-width: 900px; width: 100%; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);">
+
+        {{!-- Header Section --}}
+        <div class="text-center mb-4">
+            <h1 class="display-5 fw-bold text-primary mb-4">Quote Spotlight</h1>
+        </div>
+
+        {{!-- Quote Content Section --}}
+        <div class="quote-section mb-4">
+            <div class="card border-0 bg-light p-3 mb-3">
+                <blockquote class="blockquote text-center mb-0">
+                    <p class="mb-3 fs-5 fw-light fst-italic">"{{quote.content}}"</p>
+                    <footer class="blockquote-footer">
+                        <strong>{{quote.user}}</strong>
+                        <br>
+                        <small class="text-muted format-date">{{quote.timestamp}}</small>
+                    </footer>
+                </blockquote>
+            </div>
+        </div>
+
+        {{!-- Ratings Analytics Section --}}
+        <div class="ratings-section mb-4">
+            {{!-- Check if ratings exist --}}
+            {{#if ratings}}
+                {{!-- Quick Stats at the top --}}
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="stat-item text-center p-3 bg-light rounded">
+                            <div class="fw-bold display-4" id="total-votes">-</div>
+                            <h5 class="text-muted mb-0">Total Votes</h5>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="stat-item text-center p-3 bg-light rounded">
+                            <div class="fw-bold display-4" id="avg-rating">-</div>
+                            <h5 class="text-muted mb-0">Average Rating</h5>
+                        </div>
+                    </div>
+                </div>
+
+                {{!-- Chart takes full width --}}
+                <div class="row">
+                    <div class="col-12">
+                        <canvas id="ratingsChart" class="mobile-chart"></canvas>
+                    </div>
+                </div>
+            {{else}}
+                <div class="text-center py-5">
+                    <div class="display-1 text-muted mb-3">📊</div>
+                    <h4 class="text-muted">No ratings yet</h4>
+                    <p class="text-muted">Be the first to rate this quote!</p>
+                    <a href="/rate" class="btn btn-primary btn-lg mt-3">
+                        <i class="bi bi-star"></i> Rate This Quote
+                    </a>
+                </div>
+            {{/if}}
+        </div>
+
+        {{!-- Action Buttons --}}
+        <div class="action-section text-center">
+            <div class="btn-group" role="group">
+                <a href="/rate" class="btn btn-success btn-lg">
+                    Rate Another Quote
+                </a>
+                <a href="/leaderboard" class="btn btn-info btn-lg">
+                    View Leaderboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{!-- Chart.js and Custom Scripts --}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/js/dateUtils.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get ratings data passed from the server
+    const ratingsData = {{{json ratings}}};
+
+    // Only create chart if we have ratings data
+    if (ratingsData && Object.keys(ratingsData).length > 0) {
+        createRatingsChart(ratingsData);
+        updateStats(ratingsData);
+    }
+});
+
+function createRatingsChart(ratingsData) {
+    const ctx = document.getElementById('ratingsChart');
+    if (!ctx) return;
+
+    const labels = Object.keys(ratingsData).sort((a, b) => Number(a) - Number(b));
+    const data = labels.map(key => ratingsData[key]);
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Number of Votes',
+                data: data,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.8)',
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 205, 86, 0.8)',
+                    'rgba(75, 192, 192, 0.8)',
+                    'rgba(153, 102, 255, 0.8)',
+                    'rgba(255, 159, 64, 0.8)',
+                    'rgba(199, 199, 199, 0.8)',
+                    'rgba(83, 102, 255, 0.8)',
+                    'rgba(255, 99, 255, 0.8)',
+                    'rgba(99, 255, 132, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 205, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(199, 199, 199, 1)',
+                    'rgba(83, 102, 255, 1)',
+                    'rgba(255, 99, 255, 1)',
+                    'rgba(99, 255, 132, 1)'
+                ],
+                borderWidth: 2,
+                borderRadius: 4,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Rating Distribution',
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    },
+                    title: {
+                        display: true,
+                        text: 'Number of Votes'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Rating Value'
+                    }
+                }
+            },
+            animation: {
+                duration: 1000,
+                easing: 'easeInOutQuart'
+            }
+        }
+    });
+}
+
+function updateStats(ratingsData) {
+    const ratings = Object.keys(ratingsData).map(Number);
+    const votes = Object.values(ratingsData);
+
+    // Calculate total votes
+    const totalVotes = votes.reduce((sum, count) => sum + count, 0);
+
+    // Calculate weighted average
+    let weightedSum = 0;
+    ratings.forEach((rating, index) => {
+        weightedSum += rating * votes[index];
+    });
+    const avgRating = (weightedSum / totalVotes).toFixed(1);
+
+    // Update DOM
+    document.getElementById('total-votes').textContent = totalVotes;
+    document.getElementById('avg-rating').textContent = avgRating;
+}
+
+</script>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+.quote-section .card {
+    position: relative;
+    overflow: hidden;
+}
+
+.quote-section .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #333333, #666666, #999999, #333333);
+}
+
+.btn-group .btn {
+    margin: 0 5px;
+}
+
+/* Mobile Chart Height */
+.mobile-chart {
+    height: 400px;
+}
+
+/* Mobile Card Adjustments */
+.mobile-card {
+    padding: 1rem !important;
+    margin: 10px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+    /* Change alignment to top for mobile */
+    .desktop-center {
+        align-items: flex-start !important;
+    }
+
+    /* Reduce container padding for mobile */
+    .container-fluid {
+        padding-top: 60px !important;
+    }
+
+    /* Mobile card adjustments */
+    .mobile-card {
+        padding: 0.75rem !important;
+        margin: 5px;
+        max-height: calc(100vh - 80px);
+    }
+
+    /* Smaller title on mobile */
+    .display-5 {
+        font-size: 1.8rem !important;
+    }
+
+    /* Reduce quote section padding */
+    .quote-section .card {
+        padding: 1.5rem !important;
+    }
+
+    .blockquote p {
+        font-size: 1.1rem !important;
+    }
+
+    /* Mobile chart height */
+    .mobile-chart {
+        height: 250px !important;
+    }
+
+    /* Stack stats vertically on very small screens */
+    .row.mb-4 .col-md-6 {
+        margin-bottom: 15px;
+    }
+
+    /* Smaller stat displays */
+    .display-4 {
+        font-size: 2rem !important;
+    }
+
+    .stat-item h5 {
+        font-size: 0.9rem !important;
+    }
+
+    .stat-item {
+        padding: 1rem !important;
+    }
+
+    /* Button group adjustments */
+    .btn-group {
+        flex-direction: column;
+    }
+
+    .btn-group .btn {
+        margin: 5px 0;
+        width: 100%;
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+        border-radius: 0 !important;
+        transform: none !important;
+    }
+
+    .btn-group .btn:hover {
+        transform: none !important;
+    }
+
+    /* Reduce overall margins and padding */
+    .mb-4 {
+        margin-bottom: 1rem !important;
+    }
+
+    .mb-5 {
+        margin-bottom: 1.5rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Extra small screens */
+    .mobile-card {
+        margin: 2px;
+        padding: 0.5rem !important;
+    }
+
+    .display-5 {
+        font-size: 1.5rem !important;
+    }
+
+    .mobile-chart {
+        height: 200px !important;
+    }
+
+    .display-4 {
+        font-size: 1.5rem !important;
+    }
+
+    .blockquote p {
+        font-size: 1rem !important;
+    }
+}
+
+.stat-item {
+    transition: transform 0.2s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-2px);
+}
+
+.display-5 {
+    background: linear-gradient(45deg, #007bff, #28a745);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+</style>

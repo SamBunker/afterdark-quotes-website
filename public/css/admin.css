@@ -1,0 +1,48 @@
+html {
+    height: 100vh;
+    width: 100vw;
+}
+
+body {
+    height: 100%;
+    width: 100%;
+}
+
+.nav-block {
+    height: 50px;
+    width: 100%;
+    padding-bottom: 60px;
+}
+
+.btn, label {
+    margin: 0.5em 0.5em 0.5em 0;
+}
+
+table {
+    width: 90%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+  
+th, td {
+    border: 1px solid black;
+    text-align: left;
+    padding: 0.8em;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+tr:hover {
+    background-color:#AC9C66;
+}
+
+.user-item > button {
+    margin-bottom: 3em;
+}
+
+.column {
+    padding: 0.3em 0 0.3em 0;
+}
+
