@@ -84,7 +84,7 @@ app.get('/auth/:token', async (req, res) => {
     console.log(`Token authentication successful for: ${tokenData.display_name || tokenData.username} (ID: ${tokenData.discord_id})`);
 
     // Redirect to rate page
-    res.redirect('/rate');
+    res.redirect('/');
 
   } catch (error) {
     console.error('Error in token authentication:', error);
@@ -301,15 +301,18 @@ app.post('/quote/:id', requireAuth, async (req, res) => {
 });
     
 
-app.get('/logout', requireAuth, (req, res) => {
-  req.session.user = "";
-  console.log("User Logged Out.")
-  res.redirect('/');
-});
+app.get('/logout', (req, res) => {
+  const userId = req.session.user?.userId;
+  const nickname = req.session.user?.nickname;
 
-app.get('/reset', (req, res) => {
-  req.session.user = "";
-  console.log("Session reset - user logged out.");
+  // Destroy the entire session
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Error destroying session:', err);
+    }
+  });
+
+  console.log(`User logged out: ${nickname} (ID: ${userId})`);
   res.redirect('/unauthorized');
 });
 
