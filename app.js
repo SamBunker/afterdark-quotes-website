@@ -11,6 +11,7 @@ app.use(express.static('public')); // Serve static files from "public" directory
 const session = require('express-session');
 const crypto = require('crypto');
 const secretKey = crypto.randomBytes(32).toString('hex');
+require('dotenv').config();
 
 const port = 3001;
 
@@ -36,6 +37,14 @@ app.use(session({
   }
 }));
 
+function isPasswordValid(req, res, next) {
+  if (req.session.passwordAuthenticated) {
+    next();
+  } else {
+    res.redirect('/password');
+  }
+}
+
 function isUserValid(req, res, next) {
   try {
       if (!req.session.user || typeof req.session.user !== 'object') {
@@ -48,7 +57,26 @@ function isUserValid(req, res, next) {
   }
 }
 
-app.get('/identity', async (req, res) => {
+app.get('/password', (req, res) => {
+  if (req.session.passwordAuthenticated) {
+    return res.redirect('/');
+  }
+  res.render('password', { error: null });
+});
+
+app.post('/password', (req, res) => {
+  const { password } = req.body;
+  const correctPassword = process.env.SITE_PASSWORD || 'yourpassword';
+
+  if (password === correctPassword) {
+    req.session.passwordAuthenticated = true;
+    res.redirect('/');
+  } else {
+    res.render('password', { error: 'Incorrect password. Please try again.' });
+  }
+});
+
+app.get('/identity', isPasswordValid, async (req, res) => {
   try {
     const users = await getUsers();
     const names = users.map(user => ({ id: user.discord_id, nickname: user.nickname })); 
@@ -59,7 +87,7 @@ app.get('/identity', async (req, res) => {
   }
 });
 
-app.post('/identity', async (req, res) => {
+app.post('/identity', isPasswordValid, async (req, res) => {
   const userId = req.body.userId;
   const nickname = req.body.nickname; // Capture nickname from the form
 
@@ -70,7 +98,7 @@ app.post('/identity', async (req, res) => {
 });
 
 // Token-based authentication route
-app.get('/auth/:token', async (req, res) => {
+app.get('/auth/:token', isPasswordValid, async (req, res) => {
   const token = req.params.token;
 
   try {
@@ -120,14 +148,14 @@ app.get('/auth/:token', async (req, res) => {
   }
 });
 
-app.get('/rate', isUserValid, async (req, res) => {
+app.get('/rate', isPasswordValid, isUserValid, async (req, res) => {
   const username = req.session.user.nickname;
 
   const quote = await getRandomQuote();
   res.render('rate', { username, quote });
 })
 
-app.get('/leaderboard', async (req, res) => {
+app.get('/leaderboard', isPasswordValid, async (req, res) => {
   try {
     const quotes = await getAllQuotes(); // Fetch all quotes from DynamoDB
     res.render('leaderboard', { quotes }); // Pass quotes to the template
@@ -137,13 +165,13 @@ app.get('/leaderboard', async (req, res) => {
   }
 })
 
-app.get('/limbo', async (req, res) => {
+app.get('/limbo', isPasswordValid, async (req, res) => {
   const messages = await getLimboQuotes();
   console.log(messages);
   res.render('limbo', { messages });
 })
 
-app.get('/quote/:message_id', async (req, res) => {
+app.get('/quote/:message_id', isPasswordValid, async (req, res) => {
   try {
       const messageId = req.params.message_id; // Get the message_id from the URL
       console.log(`Fetching quote data for messageId: ${messageId}`);
@@ -210,7 +238,7 @@ app.get('/quote/:message_id', async (req, res) => {
 
 
 // Route to handle button clicks (Yes or No)
-app.post('/quote/:id', async (req, res) => {
+app.post('/quote/:id', isPasswordValid, async (req, res) => {
   // const messages = getLimboQuotes();
   const messageId = req.params.id;
   console.log("Without BigInt" + messageId);
@@ -326,7 +354,7 @@ app.post('/quote/:id', async (req, res) => {
 });
     
 
-app.get('/logout', (req, res) => {
+app.get('/logout', isPasswordValid, (req, res) => {
   req.session.user = "";
   console.log("User Logged Out.")
   res.redirect('/');
@@ -334,7 +362,7 @@ app.get('/logout', (req, res) => {
 
 
 // Route to display messages
-app.get('/', (req, res) => {
+app.get('/', isPasswordValid, (req, res) => {
   res.render('home');
 });
 
