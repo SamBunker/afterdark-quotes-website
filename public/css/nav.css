@@ -58,26 +58,31 @@ body {
 
   .notMobile {
     color: black;
+    display: block; /* Default: show desktop */
+  }
+
+  .mobile {
+    display: none; /* Default: hide mobile */
   }
 
   @media (max-width: 1280px) {
     .notMobile {
-      display: none;
+      display: none !important;
     }
     .mobile {
-      display: block;
+      display: block !important;
     }
     .title {
       display: block;
     }
   }
 
-  @media (min-width: 1281px) { 
+  @media (min-width: 1281px) {
     .notMobile {
-      display: block;
+      display: block !important;
     }
     .mobile {
-      display: none;
+      display: none !important;
     }
     .title {
       display: none;
