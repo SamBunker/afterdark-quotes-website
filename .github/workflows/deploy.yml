@@ -35,12 +35,22 @@ jobs:
     - name: Run tests
       run: npm test || echo "No tests found, skipping"
 
-  deploy:
+  deploy-production:
     needs: test
     runs-on: self-hosted
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
-      - name: Trigger Portainer Webhook
+      - name: Trigger Portainer Webhook for Production (quotes.sambunker.com)
         run: |
           curl -X POST ${{ secrets.PORTAINER_WEBHOOK_URL }}
+
+  deploy-dev:
+    needs: test
+    runs-on: self-hosted
+    if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+
+    steps:
+      - name: Trigger Portainer Webhook for Dev (devquotes.sambunker.com)
+        run: |
+          curl -X POST ${{ secrets.PORTAINER_WEBHOOK_URL_DEV }}
