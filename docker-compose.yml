@@ -13,7 +13,8 @@ services:
       - PORT=3001
     restart: unless-stopped
     volumes:
-      - ./logs:/usr/src/app/logs
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
     networks:
       - d-nginx_default
 
