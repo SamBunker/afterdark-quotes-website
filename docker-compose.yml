@@ -4,16 +4,14 @@ services:
   quotes-website:
     build: .
     ports:
-      - "3002:3001"
+      - "3002:3002"
     environment:
       - NODE_ENV=production
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - PORT=3002
     restart: unless-stopped
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
     networks:
       - d-nginx_default
 
