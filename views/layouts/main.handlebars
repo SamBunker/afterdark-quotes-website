@@ -9,12 +9,14 @@
 </head>
 
 <header class="d-flex flex-wrap py-3 nav-bg fixed-top px-5">
-    <!-- Desktop Layout -->
-    <div class="notMobile d-flex w-100 align-items-center">
+    <div class="d-flex w-100 align-items-center">
+        <!-- Responsive Logo -->
         <div class="me-auto">
-            <a href="/" class="fs-1 text-dark text-decoration-none">After Dark Quotes</a>
+            <a href="/" class="text-dark text-decoration-none responsive-logo">After Dark Quotes</a>
         </div>
-        <ul class="nav nav-pills">
+
+        <!-- Desktop Navigation -->
+        <ul class="nav nav-pills notMobile">
             <li class="nav-item"><a href="/" class="nav-link" aria-current="page">Home</a></li>
             <li class="nav-item"><a href="/rate" class="nav-link">Rate Quotes</a></li>
             {{#if isAdmin}}
@@ -23,27 +25,26 @@
             <li class="nav-item"><a href="/leaderboard" class="nav-link">Leaderboards</a></li>
             <li class="nav-item"><a href="/logout" class="nav-link text-danger">Logout</a></li>
         </ul>
-    </div>
 
-    <!-- Mobile Layout -->
-    <div class="mobile w-100">
-        <div class="d-flex justify-content-between align-items-center">
-            <a href="/" class="fs-4 text-dark text-decoration-none">After Dark Quotes</a>
+        <!-- Mobile Hamburger -->
+        <div class="mobile">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
         </div>
-        <div class="collapse mt-3" id="navbarToggleExternalContent">
-            <ul class="nav flex-column nav-pills">
-                <li class="nav-item"><a href="/" class="nav-link">Home</a></li>
-                <li class="nav-item"><a href="/rate" class="nav-link">Rate Quotes</a></li>
-                {{#if isAdmin}}
-                <li class="nav-item"><a href="/limbo" class="nav-link">Approve Quotes</a></li>
-                {{/if}}
-                <li class="nav-item"><a href="/leaderboard" class="nav-link">Leaderboards</a></li>
-                <li class="nav-item"><a href="/logout" class="nav-link text-danger">Logout</a></li>
-            </ul>
-        </div>
+    </div>
+
+    <!-- Mobile Navigation Menu -->
+    <div class="collapse mobile w-100 mt-3" id="navbarToggleExternalContent">
+        <ul class="nav flex-column nav-pills">
+            <li class="nav-item"><a href="/" class="nav-link">Home</a></li>
+            <li class="nav-item"><a href="/rate" class="nav-link">Rate Quotes</a></li>
+            {{#if isAdmin}}
+            <li class="nav-item"><a href="/limbo" class="nav-link">Approve Quotes</a></li>
+            {{/if}}
+            <li class="nav-item"><a href="/leaderboard" class="nav-link">Leaderboards</a></li>
+            <li class="nav-item"><a href="/logout" class="nav-link text-danger">Logout</a></li>
+        </ul>
     </div>
 </header>
 

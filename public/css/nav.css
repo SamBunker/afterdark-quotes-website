@@ -65,6 +65,12 @@ body {
     display: none; /* Default: hide mobile */
   }
 
+  /* Responsive Logo */
+  .responsive-logo {
+    font-size: 2rem; /* Default large size for desktop */
+    transition: font-size 0.3s ease;
+  }
+
   @media (max-width: 1280px) {
     .notMobile {
       display: none !important;
@@ -74,6 +80,9 @@ body {
     }
     .title {
       display: block;
+    }
+    .responsive-logo {
+      font-size: 1.25rem; /* Smaller size for mobile */
     }
   }
 
@@ -86,5 +95,8 @@ body {
     }
     .title {
       display: none;
+    }
+    .responsive-logo {
+      font-size: 2rem; /* Large size for desktop */
     }
   }
