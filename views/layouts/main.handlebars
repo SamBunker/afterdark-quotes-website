@@ -8,45 +8,60 @@
   <link rel="stylesheet" href="/css/nav.css">
 </head>
 
-<header class="d-flex flex-wrap py-3 nav-bg fixed-top px-5">
-    <div class="d-flex w-100 align-items-center">
-        <!-- Responsive Logo -->
-        <div class="me-auto">
-            <a href="/" class="text-dark text-decoration-none responsive-logo">After Dark Quotes</a>
-        </div>
+<header class="simple-navbar">
+    <div class="nav-container">
+        <a href="/" class="nav-logo">After Dark Quotes</a>
 
         <!-- Desktop Navigation -->
-        <ul class="nav nav-pills notMobile">
-            <li class="nav-item"><a href="/" class="nav-link" aria-current="page">Home</a></li>
-            <li class="nav-item"><a href="/rate" class="nav-link">Rate Quotes</a></li>
+        <nav class="nav-links desktop-nav">
+            <a href="/">Home</a>
+            <a href="/rate">Rate Quotes</a>
             {{#if isAdmin}}
-            <li class="nav-item"><a href="/limbo" class="nav-link">Approve Quotes</a></li>
+            <a href="/limbo">Approve Quotes</a>
             {{/if}}
-            <li class="nav-item"><a href="/leaderboard" class="nav-link">Leaderboards</a></li>
-            <li class="nav-item"><a href="/logout" class="nav-link text-danger">Logout</a></li>
-        </ul>
+            <a href="/leaderboard">Leaderboards</a>
+            <a href="/logout" class="logout-link">Logout</a>
+        </nav>
 
-        <!-- Mobile Hamburger -->
-        <div class="mobile">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-        </div>
+        <!-- Mobile Hamburger Button -->
+        <button class="hamburger-btn" id="hamburger" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
     </div>
 
     <!-- Mobile Navigation Menu -->
-    <div class="collapse mobile w-100 mt-3" id="navbarToggleExternalContent">
-        <ul class="nav flex-column nav-pills">
-            <li class="nav-item"><a href="/" class="nav-link">Home</a></li>
-            <li class="nav-item"><a href="/rate" class="nav-link">Rate Quotes</a></li>
-            {{#if isAdmin}}
-            <li class="nav-item"><a href="/limbo" class="nav-link">Approve Quotes</a></li>
-            {{/if}}
-            <li class="nav-item"><a href="/leaderboard" class="nav-link">Leaderboards</a></li>
-            <li class="nav-item"><a href="/logout" class="nav-link text-danger">Logout</a></li>
-        </ul>
-    </div>
+    <nav class="mobile-nav" id="mobileNav">
+        <a href="/">Home</a>
+        <a href="/rate">Rate Quotes</a>
+        {{#if isAdmin}}
+        <a href="/limbo">Approve Quotes</a>
+        {{/if}}
+        <a href="/leaderboard">Leaderboards</a>
+        <a href="/logout" class="logout-link">Logout</a>
+    </nav>
 </header>
+
+<script>
+    // Mobile menu toggle
+    const hamburger = document.getElementById('hamburger');
+    const mobileNav = document.getElementById('mobileNav');
+
+    hamburger.addEventListener('click', function() {
+        this.classList.toggle('active');
+        mobileNav.classList.toggle('active');
+    });
+
+    // Close menu when clicking a link
+    const mobileLinks = mobileNav.querySelectorAll('a');
+    mobileLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            hamburger.classList.remove('active');
+            mobileNav.classList.remove('active');
+        });
+    });
+</script>
 
 <style>
     body {

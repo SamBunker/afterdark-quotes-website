@@ -13,90 +13,185 @@
 }
 
 body {
-    padding-top: 4.5em;
-    font-family: 'opensans', sans-serif;
-  }
-  
-  .nav-bg {
-    background-color: #ffffff;
+  padding-top: 70px; /* Space for fixed navbar */
+  font-family: 'opensans', sans-serif;
+  margin: 0;
+}
+
+/* Simple Navbar Styles */
+.simple-navbar {
+  background-color: #ffffff;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.nav-logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #000;
+  text-decoration: none;
+  font-family: 'opensans', sans-serif;
+}
+
+.nav-logo:hover {
+  color: #333;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.nav-links a {
+  color: #000;
+  text-decoration: none;
+  font-family: 'opensans', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+.nav-links a:hover {
+  color: #0C1E3D;
+}
+
+.nav-links .logout-link {
+  color: #dc3545;
+}
+
+.nav-links .logout-link:hover {
+  color: #c82333;
+}
+
+/* Hamburger Button (hidden by default on desktop) */
+.hamburger-btn {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.hamburger-btn span {
+  width: 25px;
+  height: 3px;
+  background-color: #000;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+/* Hamburger animation when active */
+.hamburger-btn.active span:nth-child(1) {
+  transform: rotate(45deg) translate(7px, 7px);
+}
+
+.hamburger-btn.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-btn.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* Mobile Navigation (hidden by default) */
+.mobile-nav {
+  display: none;
+  flex-direction: column;
+  background-color: #ffffff;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.mobile-nav.active {
+  max-height: 400px;
+}
+
+.mobile-nav a {
+  padding: 1rem 2rem;
+  color: #000;
+  text-decoration: none;
+  font-family: 'opensans', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+  font-size: 0.9rem;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.mobile-nav a:hover {
+  background-color: #f8f9fa;
+  color: #0C1E3D;
+}
+
+.mobile-nav .logout-link {
+  color: #dc3545;
+}
+
+.mobile-nav .logout-link:hover {
+  color: #c82333;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  /* Hide desktop navigation */
+  .desktop-nav {
+    display: none;
   }
 
-  .nav-item {
-    padding-left: 1em;
+  /* Show hamburger button */
+  .hamburger-btn {
+    display: flex;
   }
 
-  .nav-item a {
-    color: black;
-    font-family: 'opensans', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: .2rem;
+  /* Show mobile navigation structure */
+  .mobile-nav {
+    display: flex;
   }
 
-  .nav-item a:hover {
-    background-color: #0C1E3D;
-    color: #f2f2f2;
-  }
-  
-  .nav-item a:active {
-    background-color: #0C1E3D;
-    color: #f2f2f2;
-  }
-  
-  footer {
-    font-family: "opensans", sans-serif;
-    position: relative;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    text-align: center;
-    padding: 10px;
-    font-size: 12px;
-    font-weight: bold;
-    color: #000;
-    letter-spacing: 2px;
+  /* Adjust logo size for mobile */
+  .nav-logo {
+    font-size: 1.2rem;
   }
 
-  .notMobile {
-    color: black;
-    display: block; /* Default: show desktop */
+  /* Reduce navbar padding on mobile */
+  .nav-container {
+    padding: 1rem;
   }
+}
 
-  .mobile {
-    display: none; /* Default: hide mobile */
-  }
-
-  /* Responsive Logo */
-  .responsive-logo {
-    font-size: 2rem; /* Default large size for desktop */
-    transition: font-size 0.3s ease;
-  }
-
-  @media (max-width: 1280px) {
-    .notMobile {
-      display: none !important;
-    }
-    .mobile {
-      display: block !important;
-    }
-    .title {
-      display: block;
-    }
-    .responsive-logo {
-      font-size: 1.25rem; /* Smaller size for mobile */
-    }
-  }
-
-  @media (min-width: 1281px) {
-    .notMobile {
-      display: block !important;
-    }
-    .mobile {
-      display: none !important;
-    }
-    .title {
-      display: none;
-    }
-    .responsive-logo {
-      font-size: 2rem; /* Large size for desktop */
-    }
-  }
+footer {
+  font-family: "opensans", sans-serif;
+  position: relative;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  padding: 10px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #000;
+  letter-spacing: 2px;
+}
