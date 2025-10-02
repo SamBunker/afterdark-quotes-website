@@ -4,13 +4,13 @@ services:
   quotes-website:
     build: .
     ports:
-      - "${HOST_PORT:-3001}:${CONTAINER_PORT:-3001}"
+      - "${HOST_PORT:-3001}:3001"
     environment:
       - NODE_ENV=production
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-      - PORT=${PORT}
+      - PORT=3001
     restart: unless-stopped
     volumes:
       - ./logs:/usr/src/app/logs
