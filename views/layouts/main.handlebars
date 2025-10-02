@@ -7,45 +7,62 @@
   <link rel="stylesheet" href="/css/bootstrap.min.css">
   <link rel="stylesheet" href="/css/nav.css">
 </head>
+<body class="d-flex flex-column px-5">
 
-<header class="nav-bg fixed-top">
-    <nav class="navbar navbar-expand-md navbar-light py-3 px-5">
-        <!-- Desktop Title -->
-        <div class="notMobile">
-            <a href="/" class="navbar-brand fs-1 text-dark text-decoration-none">After Dark Quotes</a>
-        </div>
-
-        <!-- Mobile Hamburger Button -->
-        <div class="mobile">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggleExternalContent" aria-controls="navbarToggleExternalContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-        </div>
+<header class="simple-navbar">
+    <div class="nav-container">
+        <a href="/" class="nav-logo">After Dark Quotes</a>
 
         <!-- Desktop Navigation -->
-        <ul class="nav nav-pills ms-auto notMobile">
-            <li class="nav-item"><a href="/" class="nav-link" aria-current="page">Home</a></li>
-            <li class="nav-item"><a href="/rate" class="nav-link">Rate Quotes</a></li>
+        <nav class="nav-links desktop-nav">
+            <a href="/">Home</a>
+            <a href="/rate">Rate Quotes</a>
             {{#if isAdmin}}
-            <li class="nav-item"><a href="/limbo" class="nav-link">Approve Quotes</a></li>
+            <a href="/limbo">Approve Quotes</a>
             {{/if}}
-            <li class="nav-item"><a href="/leaderboard" class="nav-link">Leaderboards</a></li>
-            <li class="nav-item"><a href="/logout" class="nav-link text-danger">Logout</a></li>
-        </ul>
+            <a href="/leaderboard">Leaderboards</a>
+            <a href="/logout" class="logout-link">Logout</a>
+        </nav>
 
-        <!-- Mobile Navigation (Collapsible) -->
-        <div class="collapse navbar-collapse mobile" id="navbarToggleExternalContent">
-            <ul class="nav flex-column nav-pills mt-3">
-                <li class="nav-item"><a href="/rate" class="nav-link">Rate Quotes</a></li>
-                {{#if isAdmin}}
-                <li class="nav-item"><a href="/limbo" class="nav-link">Approve Quotes</a></li>
-                {{/if}}
-                <li class="nav-item"><a href="/leaderboard" class="nav-link">Leaderboards</a></li>
-                <li class="nav-item"><a href="/logout" class="nav-link text-danger">Logout</a></li>
-            </ul>
-        </div>
+        <!-- Mobile Hamburger Button -->
+        <button class="hamburger-btn" id="hamburger" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
+
+    <!-- Mobile Navigation Menu -->
+    <nav class="mobile-nav" id="mobileNav">
+        <a href="/">Home</a>
+        <a href="/rate">Rate Quotes</a>
+        {{#if isAdmin}}
+        <a href="/limbo">Approve Quotes</a>
+        {{/if}}
+        <a href="/leaderboard">Leaderboards</a>
+        <a href="/logout" class="logout-link">Logout</a>
     </nav>
 </header>
+
+<script>
+    // Mobile menu toggle
+    const hamburger = document.getElementById('hamburger');
+    const mobileNav = document.getElementById('mobileNav');
+
+    hamburger.addEventListener('click', function() {
+        this.classList.toggle('active');
+        mobileNav.classList.toggle('active');
+    });
+
+    // Close menu when clicking a link
+    const mobileLinks = mobileNav.querySelectorAll('a');
+    mobileLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            hamburger.classList.remove('active');
+            mobileNav.classList.remove('active');
+        });
+    });
+</script>
 
 <style>
     body {
@@ -66,7 +83,6 @@
 
 </style>
 
-<body class="d-flex flex-column px-5">
   {{{body}}}
   <script src="/js/bootstrap.bundle.min.js"></script>
 </body>

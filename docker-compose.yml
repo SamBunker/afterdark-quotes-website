@@ -4,17 +4,14 @@ services:
   quotes-website:
     build: .
     ports:
-      - "3001:3001"
+      - "${INTERNAL_PORT}:3001"
     environment:
       - NODE_ENV=production
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-      - PORT=${PORT}
-      - SITE_PASSWORD=${SITE_PASSWORD}
+      - PORT=3001
     restart: unless-stopped
-    volumes:
-      - ./logs:/usr/src/app/logs
     networks:
       - d-nginx_default
 

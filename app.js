@@ -13,7 +13,7 @@ const crypto = require('crypto');
 const secretKey = crypto.randomBytes(32).toString('hex');
 require('dotenv').config();
 
-const port = 3001;
+const port = process.env.PORT || 3001;
 
 // Set up Handlebars as the template engine
 app.engine('handlebars', engine({
@@ -127,7 +127,7 @@ app.get('/rate', requireAuth, async (req, res) => {
   res.render('rate', { username, quote });
 })
 
-app.get('/leaderboard', async (req, res) => {
+app.get('/leaderboard', requireAuth, async (req, res) => {
   try {
     const quotes = await getAllQuotes(); // Fetch all quotes from DynamoDB
     res.render('leaderboard', { quotes }); // Pass quotes to the template
@@ -143,7 +143,7 @@ app.get('/limbo', isAdmin, async (req, res) => {
   res.render('limbo', { messages });
 })
 
-app.get('/quote/:message_id', async (req, res) => {
+app.get('/quote/:message_id', requireAuth, async (req, res) => {
   try {
       const messageId = req.params.message_id; // Get the message_id from the URL
       console.log(`Fetching quote data for messageId: ${messageId}`);
