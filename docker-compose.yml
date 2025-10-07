@@ -14,6 +14,11 @@ services:
     restart: unless-stopped
     networks:
       - d-nginx_default
+    logging:
+      driver: syslog
+      options:
+        syslog-address: "udp://${LOGGING_IP}:1514"
+        tag: "afterdark-quotes-website"
 
 networks:
   d-nginx_default:
