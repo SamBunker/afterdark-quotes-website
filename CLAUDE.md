@@ -10,12 +10,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   AWS_ACCESS_KEY_ID=
   AWS_SECRET_ACCESS_KEY=
   AWS_DEFAULT_REGION=
-  PORT=3000
+  PORT=3001
   ```
 
 ### Running the Application
 - **Local development**: `node app.js`
-- **Docker container**: `docker run -v "<path>/:/app" -w /app -p 3000:3000 node:18-slim bash -c "npm install && node app.js"`
+- **Docker container**: `docker run -v "<path>/:/app" -w /app -p 3001:3001 node:18-slim bash -c "npm install && node app.js"`
 - **Install dependencies**: `npm install --legacy-peer-deps`
 
 ## Architecture Overview
@@ -29,8 +29,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `afterdark-quotes`: Main quotes storage
 - `afterdark-quote-ratings`: User ratings for quotes
 - `limbo-afterdark-quotes`: Pending quotes awaiting approval
-- `afterdark-auth-tokens`: Authentication tokens with user information (discord_id, username, display_name)
-- ~~`afterdark_quotes_members`~~: *DEPRECATED* - User info now stored in auth tokens
+- `afterdark_quotes_members`: User/member information
 
 ### Key Features
 - **Quote Rating System**: Users can rate quotes 1-10 with slider interface and confetti celebration

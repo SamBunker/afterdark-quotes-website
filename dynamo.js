@@ -1,5 +1,6 @@
 const AWS = require("aws-sdk");
 require('dotenv').config();
+const logger = require('./logger');
 
 AWS.config.update({
     region: process.env.AWS_DEFAULT_REGION,
@@ -37,14 +38,14 @@ const getQuote = async (message_id) => {
     };
 
     try {
-        console.log("Querying DynamoDB with:", params);
+        logger.debug("Querying DynamoDB with:", params);
         const result = await dynamoClient.get(params).promise();
 
-        console.log("DynamoDB Response:", result); // Debugging Output
+        logger.debug("DynamoDB Response:", result); // Debugging Output
 
         return result.Item || null; // Use `Item`, not `Items`
     } catch (error) {
-        console.error("Error fetching quote rating:", error);
+        logger.error("Error fetching quote rating:", error);
         return null; // Return `null` if there's an error
     }
 };
@@ -80,7 +81,7 @@ const getRandomQuote = async () => {
         const randomIndex = Math.floor(Math.random() * data.Items.length);
         return data.Items[randomIndex]; // Return a random quote object
     } catch (error) {
-        console.error('Error fetching quote:', error);
+        logger.error('Error fetching quote:', error);
         return null;
     }
 }
@@ -129,7 +130,7 @@ const deleteLimboQuote = async (message_id) => {
             message_id: message_id.toString()
         }
     };
-    console.log('Deleting with message_id:', message_id.toString(), 'type:', typeof message_id.toString());
+    logger.debug('Deleting with message_id:', message_id.toString(), 'type:', typeof message_id.toString());
     return await dynamoClient.delete(params).promise();
 }
 
@@ -148,7 +149,7 @@ const getLimboQuote = async (message_id) => {
             message_id: message_id.toString()
         }
     };
-    console.log('Getting limbo quote with message_id:', message_id.toString(), 'type:', typeof message_id.toString());
+    logger.debug('Getting limbo quote with message_id:', message_id.toString(), 'type:', typeof message_id.toString());
     const result = await dynamoClient.get(params).promise();
 
     // No need for number processing since new table uses String partition key
@@ -163,15 +164,15 @@ const fetchQuoteRating = async (message_id) => {
         }
     };
     try {
-        console.log("Querying DynamoDB with:", params);
+        logger.debug("Querying DynamoDB with:", params);
         const result = await dynamoClient.get(params).promise();
 
-        console.log("DynamoDB Response:", result); // Debugging Output
+        logger.debug("DynamoDB Response:", result); // Debugging Output
 
         // Return the full item instead of just ratings
         return result.Item || null;
     } catch (error) {
-        console.error("Error fetching quote rating:", error);
+        logger.error("Error fetching quote rating:", error);
         return null; // Return `null` if there's an error
     }
 };
@@ -185,12 +186,12 @@ const getQuoteRating = async (message_id) => {
     };
 
     try {
-        console.log("Querying DynamoDB with:", params);
+        logger.debug("Querying DynamoDB with:", params);
         const result = await dynamoClient.get(params).promise();
-        console.log("DynamoDB Response:", result); // Debugging Output
+        logger.debug("DynamoDB Response:", result); // Debugging Output
 
         if (result.Item && result.Item.ratings && Array.isArray(result.Item.ratings)) {
-            console.log("Corrected Ratings Structure:", result.Item.ratings);
+            logger.debug("Corrected Ratings Structure:", result.Item.ratings);
 
             // Convert ratings from the correct structure
             const ratingsCount = {};
@@ -209,7 +210,7 @@ const getQuoteRating = async (message_id) => {
             return {}; // Return empty object if no ratings found
         }
     } catch (error) {
-        console.error("Error fetching quote rating:", error);
+        logger.error("Error fetching quote rating:", error);
         return null;
     }
 };
@@ -273,7 +274,7 @@ const getAuthToken = async (token) => {
         const result = await dynamoClient.get(params).promise();
         return result.Item || null;
     } catch (error) {
-        console.error("Error fetching auth token:", error);
+        logger.error("Error fetching auth token:", error);
         return null;
     }
 };

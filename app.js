@@ -13,6 +13,11 @@ const crypto = require('crypto');
 const secretKey = crypto.randomBytes(32).toString('hex');
 require('dotenv').config();
 
+// Winston logger setup
+const winston = require('winston');
+const expressWinston = require('express-winston');
+const logger = require('./logger');
+
 const port = process.env.PORT || 3001;
 
 // Set up Handlebars as the template engine
@@ -27,6 +32,21 @@ app.set('view engine', 'handlebars');
 
 // Middleware to parse incoming request bodies
 app.use(bodyParser.urlencoded({ extended: false }));
+
+// Express-Winston HTTP request logging middleware
+app.use(expressWinston.logger({
+  transports: [
+    new winston.transports.Console()
+  ],
+  format: winston.format.combine(
+    winston.format.json()
+  ),
+  meta: true,
+  msg: "HTTP {{req.method}} {{req.url}}",
+  expressFormat: true,
+  colorize: false,
+  ignoreRoute: function (req, res) { return false; }
+}));
 
 app.use(session({
   secret: secretKey,
@@ -50,7 +70,7 @@ function requireAuth(req, res, next) {
       }
       next();
   } catch (error) {
-      console.error(error.message);
+      logger.error(error.message);
       res.status(401).redirect('/unauthorized');
   }
 }
@@ -65,7 +85,7 @@ function isAdmin(req, res, next) {
       }
       next();
   } catch (error) {
-      console.error(error.message);
+      logger.error(error.message);
       res.status(403).render('error', {
         message: 'Access Denied',
         details: 'You do not have permission to access this page. Admin access is required.'
@@ -86,7 +106,7 @@ app.get('/auth/:token', async (req, res) => {
     const validation = await validateAuthToken(token);
 
     if (!validation.valid) {
-      console.log(`Authentication failed: ${validation.reason}`);
+      logger.info(`Authentication failed: ${validation.reason}`);
       return res.status(401).render('error', {
         message: 'Authentication Failed',
         details: `Invalid or expired link. ${validation.reason}. Please try generating a new link from Discord.`
@@ -106,13 +126,13 @@ app.get('/auth/:token', async (req, res) => {
       accessLevel: tokenData.access_level || 'member' // Default to member if not specified
     };
 
-    console.log(`Token authentication successful for: ${tokenData.display_name || tokenData.username} (ID: ${tokenData.discord_id}, Access: ${tokenData.access_level || 'member'})`);
+    logger.info(`Token authentication successful for: ${tokenData.display_name || tokenData.username} (ID: ${tokenData.discord_id}, Access: ${tokenData.access_level || 'member'})`);
 
     // Redirect to rate page
     res.redirect('/');
 
   } catch (error) {
-    console.error('Error in token authentication:', error);
+    logger.error('Error in token authentication:', error);
     res.status(500).render('error', {
       message: 'Authentication Error',
       details: 'An error occurred during authentication. Please try again or contact support.'
@@ -132,34 +152,34 @@ app.get('/leaderboard', requireAuth, async (req, res) => {
     const quotes = await getAllQuotes(); // Fetch all quotes from DynamoDB
     res.render('leaderboard', { quotes }); // Pass quotes to the template
   } catch (error) {
-    console.error('Error fetching quotes:', error);
+    logger.error('Error fetching quotes:', error);
     res.status(500).send('Error retrieving quotes');
   }
 })
 
 app.get('/limbo', isAdmin, async (req, res) => {
   const messages = await getLimboQuotes();
-  console.log(messages);
+  logger.info('Limbo messages:', { count: messages.length });
   res.render('limbo', { messages });
 })
 
 app.get('/quote/:message_id', requireAuth, async (req, res) => {
   try {
       const messageId = req.params.message_id; // Get the message_id from the URL
-      console.log(`Fetching quote data for messageId: ${messageId}`);
+      logger.info(`Fetching quote data for messageId: ${messageId}`);
 
       const quoteData = await getQuote(Number(messageId)); // Use Number for main quotes table
       const ratingsCount = await getQuoteRating(Number(messageId)); // Use Number for ratings table
 
-      console.log('Quote data:', quoteData);
-      console.log('Ratings data:', ratingsCount);
+      logger.debug('Quote data:', quoteData);
+      logger.debug('Ratings data:', ratingsCount);
 
       res.render('quote', {
           quote: quoteData,
           ratings: ratingsCount
       }); // Pass the quote and ratings to the template
   } catch (error) {
-      console.error("Error fetching quote:", error);
+      logger.error("Error fetching quote:", error);
       res.status(500).send("Error retrieving quote.");
   }
 });
@@ -213,9 +233,9 @@ app.get('/quote/:message_id', requireAuth, async (req, res) => {
 app.post('/quote/:id', requireAuth, async (req, res) => {
   // const messages = getLimboQuotes();
   const messageId = req.params.id;
-  console.log("Without BigInt" + messageId);
-  console.log("With BigInt" + BigInt(messageId));
-  console.log("With Number" + Number(messageId));
+  logger.debug("Without BigInt" + messageId);
+  logger.debug("With BigInt" + BigInt(messageId));
+  logger.debug("With Number" + Number(messageId));
   let rating;
   let sessionUserID;
   let sessionUsername;
@@ -235,42 +255,42 @@ app.post('/quote/:id', requireAuth, async (req, res) => {
     try {
         // Check if item_json exists and has 'Item'
         if (!item_json || !item_json.Item) {
-            console.error("Error: Quote not found in limbo for messageId:", messageId);
+            logger.error("Error: Quote not found in limbo for messageId:", messageId);
             return res.status(404).json({ error: "Quote not found" });
         }
 
         // Add or update the quote
         await addOrUpdateQuote(item_json.Item);
         await deleteLimboQuote(BigInt(messageId));  // Delete after adding or updating
-        console.log(deleteLimboQuote(BigInt(messageId)));
+        logger.info('Quote approved and moved from limbo:', messageId);
         res.redirect('/limbo');
         return;
     } catch (error) {
-        console.error(error);
+        logger.error(error);
         res.status(500).json({ error: 'Something went wrong. (yes)' });
     }
   } else if (req.body.action === 'no') {
       try {
           // Delete the quote if the action is 'no'
           await deleteLimboQuote(BigInt(messageId));
-          console.log(await deleteLimboQuote(BigInt(messageId)));
+          logger.info('Quote rejected and deleted from limbo:', messageId);
           res.redirect('/limbo');
           return;
       } catch (error) {
-          console.error(error);
+          logger.error(error);
           res.status(500).json({ error: 'Something went wrong (no)' });
       }
 
     // Handling Quote Rating and Updates
   } if (req.body.action !== 'yes' && req.body.action !== 'no') {
       if (rating && sessionUsername && messageId) {
-          console.log("Fetching quote rating for message ID:", messageId);
+          logger.info("Fetching quote rating for message ID:", messageId);
           const quoteResults = await fetchQuoteRating(BigInt(messageId));
-          console.log("Quote Results:", quoteResults);
+          logger.debug("Quote Results:", quoteResults);
 
 
           if (!quoteResults || !quoteResults.ratings || !Array.isArray(quoteResults.ratings) || quoteResults.ratings.length === 0) {
-              console.log("Ratings Do Not Exist in Database");
+              logger.info("Ratings Do Not Exist in Database");
 
               const newRating = {
                   message_id: BigInt(messageId),
@@ -283,18 +303,18 @@ app.post('/quote/:id', requireAuth, async (req, res) => {
               };
 
               await addOrUpdateQuoteRating(newRating);
-              console.log("Added new rating");
+              logger.info("Added new rating");
               res.redirect('/rate');
 
           } else {
-              console.log("Ratings Exist in Database");
-              console.log("Existing Ratings:", quoteResults);
+              logger.info("Ratings Exist in Database");
+              logger.debug("Existing Ratings:", quoteResults);
 
               // Extract existing ratings from correct structure
               let updatedRatings = Array.isArray(quoteResults.ratings) ? quoteResults.ratings : [];
 
-              console.log("updatedRatings array:", JSON.stringify(updatedRatings, null, 2));
-              console.log("Looking for sessionUserID:", sessionUserID.toString());
+              logger.debug("updatedRatings array:", JSON.stringify(updatedRatings, null, 2));
+              logger.debug("Looking for sessionUserID:", sessionUserID.toString());
 
               // Check if user already rated
               const userIndex = updatedRatings.findIndex(entry => entry.sessionUserID.toString() === sessionUserID.toString());
@@ -306,19 +326,19 @@ app.post('/quote/:id', requireAuth, async (req, res) => {
                       sessionUserID: sessionUserID.toString(), // Store as string to prevent precision loss
                       rating: Number(rating)
                   });
-                  console.log(`Replaced ${sessionUserID}'s rating with ${rating}`);
+                  logger.info(`Replaced ${sessionUserID}'s rating with ${rating}`);
               } else {
                   // User does not exist, add a new rating
                   updatedRatings.push({
                       sessionUserID: sessionUserID.toString(), // Store as string to prevent precision loss
                       rating: Number(rating)
                   });
-                  console.log(`Added new rating for ${sessionUserID}`);
+                  logger.info(`Added new rating for ${sessionUserID}`);
               }
 
               // Update the database
               await updateQuoteRating(messageId, updatedRatings);
-              console.log("Updated rating in database");
+              logger.info("Updated rating in database");
               res.redirect('/rate');
           }
       }
@@ -333,11 +353,11 @@ app.get('/logout', (req, res) => {
   // Destroy the entire session
   req.session.destroy((err) => {
     if (err) {
-      console.error('Error destroying session:', err);
+      logger.error('Error destroying session:', err);
     }
   });
 
-  console.log(`User logged out: ${nickname} (ID: ${userId})`);
+  logger.info(`User logged out: ${nickname} (ID: ${userId})`);
   res.redirect('/unauthorized');
 });
 
@@ -352,5 +372,5 @@ app.get('/', (req, res) => {
 
 // Start the Express server
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+  logger.info(`Server running at http://localhost:${port}`);
 });
