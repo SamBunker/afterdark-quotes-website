@@ -11,6 +11,9 @@ services:
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
       - PORT=3001
+      - DEV_MODE=${DEV_MODE}
+      - PASSWORD=${PASSWORD}
+      - DEV_USER_ID=${DEV_USER_ID}
     restart: unless-stopped
     networks:
       - d-nginx_default
