@@ -75,6 +75,11 @@
         <div style="margin-top: 2rem; padding: 1.5rem; background: #fff3cd; border-radius: 10px; border: 2px solid #ffc107;">
             <h5 style="color: #856404; margin-bottom: 1rem;">🔧 Developer Mode</h5>
             <form method="POST" action="/dev-login">
+                <!-- Honeypot field - hidden from real users but visible to bots -->
+                <div style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" aria-hidden="true">
+                    <label for="website">Website</label>
+                    <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                </div>
                 <div class="mb-3">
                     <input type="password" class="form-control" name="password" placeholder="Enter dev password" required>
                 </div>
@@ -83,6 +88,11 @@
             {{#if error}}
             <div class="alert alert-danger mt-3" role="alert">
                 Invalid password
+            </div>
+            {{/if}}
+            {{#if rateLimited}}
+            <div class="alert alert-warning mt-3" role="alert">
+                Too many login attempts. Please try again in 15 minutes.
             </div>
             {{/if}}
         </div>

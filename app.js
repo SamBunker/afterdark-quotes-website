@@ -11,6 +11,7 @@ app.use(express.static('public')); // Serve static files from "public" directory
 const session = require('express-session');
 const crypto = require('crypto');
 const secretKey = crypto.randomBytes(32).toString('hex');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 // Winston logger setup
@@ -99,17 +100,38 @@ app.get('/unauthorized', (req, res) => {
   logger.info('DEV_USER_ID environment variable:', process.env.DEV_USER_ID ? '[SET]' : '[NOT SET]');
   res.render('unauthorized', {
     devMode: process.env.DEV_MODE === 'true',
-    error: req.query.error === 'invalid'
+    error: req.query.error === 'invalid',
+    rateLimited: req.query.error === 'rate_limit'
   });
 });
 
+// Rate limiter for dev login - 5 attempts per 15 minutes
+const devLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 requests per windowMs
+  message: 'Too many login attempts, please try again after 15 minutes',
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    logger.warn(`Rate limit exceeded for IP: ${req.ip}`);
+    res.redirect('/unauthorized?error=rate_limit');
+  }
+});
+
 // Dev mode password login
-app.post('/dev-login', (req, res) => {
+app.post('/dev-login', devLoginLimiter, (req, res) => {
   if (process.env.DEV_MODE !== 'true') {
     return res.status(403).send('Dev mode is not enabled');
   }
 
-  const { password } = req.body;
+  const { password, website } = req.body;
+
+  // Honeypot check - if 'website' field is filled, it's likely a bot
+  if (website) {
+    logger.warn(`Honeypot triggered from IP: ${req.ip}`);
+    // Silently fail - don't let the bot know they were caught
+    return res.redirect('/unauthorized?error=invalid');
+  }
 
   if (password === process.env.PASSWORD) {
     req.session.user = {
