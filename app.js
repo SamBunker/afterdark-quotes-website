@@ -94,6 +94,9 @@ function isAdmin(req, res, next) {
 }
 
 app.get('/unauthorized', (req, res) => {
+  logger.info('DEV_MODE environment variable:', process.env.DEV_MODE);
+  logger.info('PASSWORD environment variable:', process.env.PASSWORD ? '[SET]' : '[NOT SET]');
+  logger.info('DEV_USER_ID environment variable:', process.env.DEV_USER_ID ? '[SET]' : '[NOT SET]');
   res.render('unauthorized', {
     devMode: process.env.DEV_MODE === 'true',
     error: req.query.error === 'invalid'
