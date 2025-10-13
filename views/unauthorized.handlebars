@@ -71,7 +71,24 @@
 
         <hr style="margin: 2rem 0;">
 
-        <p style="color: #999; font-size: 0.9rem;">
+        {{#if devMode}}
+        <div style="margin-top: 2rem; padding: 1.5rem; background: #fff3cd; border-radius: 10px; border: 2px solid #ffc107;">
+            <h5 style="color: #856404; margin-bottom: 1rem;">🔧 Developer Mode</h5>
+            <form method="POST" action="/dev-login">
+                <div class="mb-3">
+                    <input type="password" class="form-control" name="password" placeholder="Enter dev password" required>
+                </div>
+                <button type="submit" class="btn btn-warning">Dev Login</button>
+            </form>
+            {{#if error}}
+            <div class="alert alert-danger mt-3" role="alert">
+                Invalid password
+            </div>
+            {{/if}}
+        </div>
+        {{/if}}
+
+        <p style="color: #999; font-size: 0.9rem; margin-top: 1.5rem;">
             🎭 After Dark Quotes Rating System
         </p>
     </div>

@@ -94,7 +94,32 @@ function isAdmin(req, res, next) {
 }
 
 app.get('/unauthorized', (req, res) => {
-  res.render('unauthorized');
+  res.render('unauthorized', {
+    devMode: process.env.DEV_MODE === 'true',
+    error: req.query.error === 'invalid'
+  });
+});
+
+// Dev mode password login
+app.post('/dev-login', (req, res) => {
+  if (process.env.DEV_MODE !== 'true') {
+    return res.status(403).send('Dev mode is not enabled');
+  }
+
+  const { password } = req.body;
+
+  if (password === process.env.PASSWORD) {
+    req.session.user = {
+      userId: process.env.DEV_USER_ID,
+      nickname: 'Dev User',
+      accessLevel: 'admin'
+    };
+    logger.info(`Dev mode login successful for user ID: ${process.env.DEV_USER_ID}`);
+    res.redirect('/');
+  } else {
+    logger.warn('Dev mode login failed: incorrect password');
+    res.redirect('/unauthorized?error=invalid');
+  }
 });
 
 // Token-based authentication route
