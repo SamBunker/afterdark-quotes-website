@@ -200,6 +200,150 @@
             color: white;
         }
 
+        .rate-this-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin-right: 0.5rem;
+        }
+
+        .rate-this-btn:hover {
+            background: #218838;
+        }
+
+        /* Rating Modal */
+        .rating-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .rating-modal.active {
+            display: flex;
+        }
+
+        .rating-modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .rating-modal-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .rating-modal-quote {
+            font-size: 1.2rem;
+            font-style: italic;
+            margin: 1rem 0;
+            color: #333;
+        }
+
+        .rating-modal-user {
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+
+        .rating-slider-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .rating-slider-label {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .rating-slider {
+            -webkit-appearance: none;
+            width: 80%;
+            height: 8px;
+            background: #ddd;
+            outline: none;
+            border-radius: 10px;
+        }
+
+        .rating-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 0%;
+            background-image: url('./img/rating.png');
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+        }
+
+        .rating-slider::-moz-range-thumb {
+            width: 50px;
+            height: 50px;
+            border-radius: 0%;
+            background-image: url('./img/rating.png');
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            border: none;
+        }
+
+        .rating-slider:hover {
+            background: #4CAF50;
+        }
+
+        .rating-modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .submit-rating-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .submit-rating-btn:hover {
+            background: #218838;
+        }
+
+        .cancel-rating-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .cancel-rating-btn:hover {
+            background: #5a6268;
+        }
+
         .no-quotes {
             text-align: center;
             padding: 3rem;
@@ -316,6 +460,7 @@
                                     </div>
                                 </div>
                                 <div style="margin-top: 1rem;">
+                                    <button class="rate-this-btn" onclick="openRatingModal('{{this.message_id}}', `{{this.content}}`, '{{this.user}}')">Rate this Quote</button>
                                     <a href="/quote/{{this.message_id}}" class="view-details-btn">View Analytics →</a>
                                 </div>
                             </div>
@@ -332,7 +477,31 @@
         </div>
     </div>
 
+    <!-- Rating Modal -->
+    <div id="ratingModal" class="rating-modal">
+        <div class="rating-modal-content">
+            <div class="rating-modal-header">
+                <h2>Rate This Quote</h2>
+            </div>
+            <p class="rating-modal-quote" id="modalQuoteContent"></p>
+            <p class="rating-modal-user">- <span id="modalQuoteUser"></span></p>
+
+            <div class="rating-slider-container">
+                <label class="rating-slider-label">
+                    <strong>Rating: <span id="modal-rating-value">5</span></strong>
+                </label>
+                <input type="range" id="modalRatingSlider" class="rating-slider" min="1" max="10" value="5" step="1">
+            </div>
+
+            <div class="rating-modal-actions">
+                <button class="submit-rating-btn" id="submitRatingBtn">Submit Rating</button>
+                <button class="cancel-rating-btn" id="cancelRatingBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="/js/dateUtils.js"></script>
     <script>
         // Search functionality
@@ -392,6 +561,130 @@
                 }
             });
         }
+
+        // Rating Modal functionality
+        const ratingModal = document.getElementById('ratingModal');
+        const modalRatingSlider = document.getElementById('modalRatingSlider');
+        const modalRatingValue = document.getElementById('modal-rating-value');
+        const submitRatingBtn = document.getElementById('submitRatingBtn');
+        const cancelRatingBtn = document.getElementById('cancelRatingBtn');
+        let currentQuoteId = null;
+
+        // Update rating value display with emoji
+        modalRatingSlider.addEventListener('input', function() {
+            let value = modalRatingSlider.value;
+            let emoji = '';
+
+            if (value == 10) {
+                emoji = '🔥';
+            } else if (value == 1) {
+                emoji = '🍆';
+            }
+
+            modalRatingValue.textContent = `${value} ${emoji}`;
+        });
+
+        // Open modal function
+        function openRatingModal(messageId, content, user) {
+            currentQuoteId = messageId;
+            document.getElementById('modalQuoteContent').textContent = `"${content}"`;
+            document.getElementById('modalQuoteUser').textContent = user;
+            modalRatingSlider.value = 5;
+            modalRatingValue.textContent = '5';
+            ratingModal.classList.add('active');
+        }
+
+        // Close modal
+        cancelRatingBtn.addEventListener('click', function() {
+            ratingModal.classList.remove('active');
+            currentQuoteId = null;
+        });
+
+        // Close modal when clicking outside
+        ratingModal.addEventListener('click', function(e) {
+            if (e.target === ratingModal) {
+                ratingModal.classList.remove('active');
+                currentQuoteId = null;
+            }
+        });
+
+        // Confetti celebration function
+        function celebrateRating() {
+            confetti({
+                particleCount: 150,
+                spread: 160,
+                origin: { x: 0.5, y: 0.5 },
+                colors: ['#28a745', '#ffc107', '#007bff', '#dc3545', '#6f42c1']
+            });
+
+            setTimeout(() => {
+                confetti({
+                    particleCount: 75,
+                    spread: 100,
+                    origin: { x: 0.2, y: 0.6 },
+                    colors: ['#28a745', '#ffc107', '#007bff', '#dc3545', '#6f42c1']
+                });
+            }, 200);
+
+            setTimeout(() => {
+                confetti({
+                    particleCount: 75,
+                    spread: 100,
+                    origin: { x: 0.8, y: 0.6 },
+                    colors: ['#28a745', '#ffc107', '#007bff', '#dc3545', '#6f42c1']
+                });
+            }, 400);
+        }
+
+        // Submit rating
+        submitRatingBtn.addEventListener('click', async function() {
+            if (!currentQuoteId) return;
+
+            const rating = modalRatingSlider.value;
+
+            // Disable button
+            submitRatingBtn.disabled = true;
+            submitRatingBtn.textContent = 'Submitting...';
+
+            try {
+                // Submit the rating
+                const formData = new URLSearchParams();
+                formData.append('message_id', currentQuoteId);
+                formData.append('rating', rating);
+
+                const response = await fetch(`/quote/${currentQuoteId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    // Celebrate
+                    celebrateRating();
+
+                    // Close modal after celebration
+                    setTimeout(() => {
+                        ratingModal.classList.remove('active');
+                        submitRatingBtn.disabled = false;
+                        submitRatingBtn.textContent = 'Submit Rating';
+
+                        // Reload the page to show updated ratings
+                        location.reload();
+                    }, 1000);
+                } else {
+                    alert('Error submitting rating. Please try again.');
+                    submitRatingBtn.disabled = false;
+                    submitRatingBtn.textContent = 'Submit Rating';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error submitting rating. Please try again.');
+                submitRatingBtn.disabled = false;
+                submitRatingBtn.textContent = 'Submit Rating';
+            }
+        });
     </script>
 </body>
 </html>
