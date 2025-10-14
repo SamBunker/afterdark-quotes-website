@@ -3,19 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Quote Performance Dashboard</title>
+    <title>Leaderboards</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 2rem 0;
+            overflow-y: auto !important;
         }
 
         .dashboard-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 1rem;
+            padding-top: 80px;
         }
 
         .dashboard-header {
@@ -122,8 +124,6 @@
         .ranking-item:hover {
             background-color: #f8f9fa;
             border-radius: 8px;
-            padding-left: 1rem;
-            padding-right: 1rem;
         }
 
         .ranking-item:last-child {
@@ -241,7 +241,7 @@
     <div class="dashboard-container">
         <!-- Header -->
         <div class="dashboard-header">
-            <h1>📊 Quote Performance Dashboard</h1>
+            <h1>📊 Leaderboards</h1>
         </div>
 
         <!-- Stats Cards -->
