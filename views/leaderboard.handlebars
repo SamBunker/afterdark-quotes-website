@@ -3,83 +3,395 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to After Dark's Quoting Journal</title>
+    <title>Quote Performance Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .dashboard-header {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .dashboard-header h1 {
+            margin: 0;
+            color: #333;
+            font-weight: 700;
+        }
+
+        /* Stats Cards */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin: 0;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin: 0;
+        }
+
+        /* Search and Filter */
+        .controls-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+        }
+
+        .search-input:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+
+        .sort-select {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+        }
+
+        /* Rankings Table */
+        .rankings-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .ranking-item {
+            border-bottom: 1px solid #e0e0e0;
+            padding: 1.5rem 0;
+            transition: background-color 0.2s ease;
+        }
+
+        .ranking-item:hover {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .ranking-item:last-child {
+            border-bottom: none;
+        }
+
+        .rank-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #999;
+            min-width: 60px;
+            display: inline-block;
+        }
+
+        .rank-medal {
+            font-size: 2rem;
+        }
+
+        .quote-content {
+            font-size: 1.1rem;
+            margin: 0.5rem 0;
+            color: #333;
+        }
+
+        .quote-meta {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .quote-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .rating-display {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .progress-bar-container {
+            background: #e0e0e0;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .view-details-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s ease;
+        }
+
+        .view-details-btn:hover {
+            background: #5568d3;
+            color: white;
+        }
+
+        .no-quotes {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-header {
+                padding: 1.5rem;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+
+            .controls-section {
+                flex-direction: column;
+            }
+
+            .search-input, .sort-select {
+                width: 100%;
+            }
+
+            .quote-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .rank-number {
+                font-size: 1.2rem;
+                min-width: 40px;
+            }
+        }
+    </style>
 </head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1>📊 Quote Performance Dashboard</h1>
+        </div>
 
-<style>
-    /* Scrollable Container */
-    .scrollable-container {
-        max-height: 500px;  /* Set a fixed height */
-        overflow-y: auto;   /* Enable vertical scrolling */
-        padding-right: 10px; /* Prevent cut-off */
-    }
-
-    .quote-card {
-        transition: transform 0.2s ease-in-out;
-    }
-    .quote-card:hover {
-        transform: scale(1.05);
-    }
-
-    /* Custom Scrollbar Styling */
-    .scrollable-container::-webkit-scrollbar {
-        width: 8px;
-    }
-    .scrollable-container::-webkit-scrollbar-thumb {
-        background-color: #888;
-        border-radius: 5px;
-    }
-    .scrollable-container::-webkit-scrollbar-thumb:hover {
-        background-color: #555;
-    }
-</style>
-
-
-<body class="bg-light">
-    <div class="container d-flex justify-content-center align-items-center min-vh-100">
-        <div class="card shadow-lg p-4" style="max-width: 800px; width: 100%;">
-            <h1 class="text-center">Quote Leaderboards 📺</h1>
-
-            <div class="mb-3 mt-3">
-                <input type="text" id="search-bar" class="form-control" placeholder="Search quotes...">
+        <!-- Stats Cards -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon">📈</div>
+                <p class="stat-value">{{stats.topAverage}}</p>
+                <p class="stat-label">Top Average</p>
             </div>
+            <div class="stat-card">
+                <div class="stat-icon">🔥</div>
+                <p class="stat-value">{{stats.mostRated}}</p>
+                <p class="stat-label">Most Rated</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💬</div>
+                <p class="stat-value">{{stats.totalQuotes}}</p>
+                <p class="stat-label">Total Quotes</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⭐</div>
+                <p class="stat-value">{{stats.totalRatings}}</p>
+                <p class="stat-label">Total Ratings</p>
+            </div>
+        </div>
 
-            <!-- Scrollable Section -->
-            <div class="scrollable-container border rounded p-3 shadow-sm" style="height:600px;">
-                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-2 g-3" id="quotes-container">
+        <!-- Search and Sort Controls -->
+        <div class="controls-section">
+            <span style="font-weight: 600;">🔍</span>
+            <input type="text" id="search-input" class="search-input" placeholder="Search quotes, users, or dates...">
+            <select id="sort-select" class="sort-select">
+                <option value="average">Sort: Average Rating ↓</option>
+                <option value="ratings">Sort: Most Ratings ↓</option>
+                <option value="recent">Sort: Most Recent</option>
+            </select>
+        </div>
+
+        <!-- Rankings List -->
+        <div class="rankings-container">
+            <div id="rankings-list">
+                {{#if quotes.length}}
                     {{#each quotes}}
-                    <div class="col quote-card-container">
-                        <a href="/quote/{{this.message_id}}" class="text-decoration-none">
-                            <div class="card quote-card h-100 shadow-sm">
-                                <div class="card-body text-center">
-                                    <p class="card-text fw-bold quote-content">"{{this.content}}"</p>
-                                    <p class="text-muted small">- {{this.user}}</p>
+                    <div class="ranking-item" data-quote-content="{{this.content}}" data-user="{{this.user}}" data-timestamp="{{this.timestamp}}" data-average="{{this.average}}" data-total-ratings="{{this.totalRatings}}">
+                        <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                            <div>
+                                {{#if (eq @index 0)}}
+                                    <span class="rank-medal">🥇</span>
+                                {{else if (eq @index 1)}}
+                                    <span class="rank-medal">🥈</span>
+                                {{else if (eq @index 2)}}
+                                    <span class="rank-medal">🥉</span>
+                                {{else}}
+                                    <span class="rank-number">#{{add @index 1}}</span>
+                                {{/if}}
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                                    <span class="rating-display">⭐ {{this.average}}</span>
+                                    <span style="color: #999;">({{this.totalRatings}} ratings)</span>
+                                </div>
+                                <p class="quote-content">"{{this.content}}"</p>
+                                <div class="quote-meta">
+                                    <span class="quote-meta-item">👤 {{this.user}}</span>
+                                    {{#if this.timestamp}}
+                                    <span class="quote-meta-item">📅 <span class="format-date">{{this.timestamp}}</span></span>
+                                    {{/if}}
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <div class="progress-bar-container">
+                                            <div class="progress-bar-fill" style="width: {{multiply this.average 10}}%"></div>
+                                        </div>
+                                        <span>{{multiply this.average 10}}%</span>
+                                    </div>
+                                </div>
+                                <div style="margin-top: 1rem;">
+                                    <a href="/quote/{{this.message_id}}" class="view-details-btn">View Analytics →</a>
                                 </div>
                             </div>
-                        </a>
+                        </div>
                     </div>
                     {{/each}}
-                </div>
+                {{else}}
+                    <div class="no-quotes">
+                        <h3>No quotes found</h3>
+                        <p>Start rating quotes to see the leaderboard!</p>
+                    </div>
+                {{/if}}
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/dateUtils.js"></script>
     <script>
-        document.getElementById('search-bar').addEventListener('input', function() {
-            let searchQuery = this.value.toLowerCase();
-            let quotes = document.querySelectorAll('.quote-card-container');
+        // Search functionality
+        const searchInput = document.getElementById('search-input');
+        const sortSelect = document.getElementById('sort-select');
+        const rankingsList = document.getElementById('rankings-list');
 
-            quotes.forEach(quote => {
-                let content = quote.querySelector('.quote-content').textContent.toLowerCase();
-                if (content.includes(searchQuery)) {
-                    quote.style.display = "block";
+        searchInput.addEventListener('input', filterQuotes);
+        sortSelect.addEventListener('change', sortQuotes);
+
+        function filterQuotes() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const items = document.querySelectorAll('.ranking-item');
+
+            items.forEach(item => {
+                const content = item.getAttribute('data-quote-content').toLowerCase();
+                const user = item.getAttribute('data-user').toLowerCase();
+                const timestamp = item.getAttribute('data-timestamp') || '';
+
+                if (content.includes(searchTerm) || user.includes(searchTerm) || timestamp.includes(searchTerm)) {
+                    item.style.display = '';
                 } else {
-                    quote.style.display = "none";
+                    item.style.display = 'none';
                 }
             });
-        });
+        }
+
+        function sortQuotes() {
+            const sortBy = sortSelect.value;
+            const items = Array.from(document.querySelectorAll('.ranking-item'));
+
+            items.sort((a, b) => {
+                if (sortBy === 'average') {
+                    return parseFloat(b.getAttribute('data-average')) - parseFloat(a.getAttribute('data-average'));
+                } else if (sortBy === 'ratings') {
+                    return parseInt(b.getAttribute('data-total-ratings')) - parseInt(a.getAttribute('data-total-ratings'));
+                } else if (sortBy === 'recent') {
+                    const timeA = a.getAttribute('data-timestamp') || '0';
+                    const timeB = b.getAttribute('data-timestamp') || '0';
+                    return timeB.localeCompare(timeA);
+                }
+            });
+
+            // Re-append sorted items
+            items.forEach(item => rankingsList.appendChild(item));
+
+            // Update rank numbers
+            updateRankNumbers();
+        }
+
+        function updateRankNumbers() {
+            const items = document.querySelectorAll('.ranking-item:not([style*="display: none"])');
+            items.forEach((item, index) => {
+                const rankElement = item.querySelector('.rank-number, .rank-medal');
+                if (rankElement && rankElement.classList.contains('rank-number')) {
+                    rankElement.textContent = `#${index + 1}`;
+                }
+            });
+        }
     </script>
 </body>
 </html>
