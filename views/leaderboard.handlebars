@@ -428,7 +428,7 @@
             <div id="rankings-list">
                 {{#if quotes.length}}
                     {{#each quotes}}
-                    <div class="ranking-item" data-quote-content="{{this.content}}" data-user="{{this.user}}" data-timestamp="{{this.timestamp}}" data-average="{{this.average}}" data-total-ratings="{{this.totalRatings}}">
+                    <div class="ranking-item" data-quote-content="{{this.content}}" data-user="{{this.user}}" data-timestamp="{{this.timestamp}}" data-average="{{this.average}}" data-total-ratings="{{this.totalRatings}}" data-message-id="{{this.message_id}}" data-index="{{@index}}">
                         <div style="display: flex; align-items: flex-start; gap: 1rem;">
                             <div>
                                 {{#if (eq @index 0)}}
@@ -474,6 +474,11 @@
                     </div>
                 {{/if}}
             </div>
+            {{#if quotes.length}}
+            <div style="text-align: center; margin-top: 2rem;">
+                <button id="loadMoreBtn" class="view-details-btn" style="font-size: 1.1rem; padding: 0.75rem 2rem;">Load More</button>
+            </div>
+            {{/if}}
         </div>
     </div>
 
@@ -504,10 +509,28 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="/js/dateUtils.js"></script>
     <script>
+        // Pagination variables
+        const QUOTES_PER_PAGE = 30;
+        let currentlyDisplayed = QUOTES_PER_PAGE;
+        let isSearching = false;
+
         // Search functionality
         const searchInput = document.getElementById('search-input');
         const sortSelect = document.getElementById('sort-select');
         const rankingsList = document.getElementById('rankings-list');
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+
+        // Initialize pagination
+        function initializePagination() {
+            const items = document.querySelectorAll('.ranking-item');
+            items.forEach((item, index) => {
+                if (index >= QUOTES_PER_PAGE) {
+                    item.style.display = 'none';
+                    item.classList.add('hidden-by-pagination');
+                }
+            });
+            updateLoadMoreButton();
+        }
 
         searchInput.addEventListener('input', filterQuotes);
         sortSelect.addEventListener('change', sortQuotes);
@@ -515,6 +538,7 @@
         function filterQuotes() {
             const searchTerm = searchInput.value.toLowerCase();
             const items = document.querySelectorAll('.ranking-item');
+            isSearching = searchTerm.length > 0;
 
             items.forEach(item => {
                 const content = item.getAttribute('data-quote-content').toLowerCase();
@@ -523,10 +547,14 @@
 
                 if (content.includes(searchTerm) || user.includes(searchTerm) || timestamp.includes(searchTerm)) {
                     item.style.display = '';
+                    item.classList.remove('hidden-by-search');
                 } else {
                     item.style.display = 'none';
+                    item.classList.add('hidden-by-search');
                 }
             });
+
+            updateLoadMoreButton();
         }
 
         function sortQuotes() {
@@ -548,6 +576,10 @@
             // Re-append sorted items
             items.forEach(item => rankingsList.appendChild(item));
 
+            // Reset pagination after sorting
+            currentlyDisplayed = QUOTES_PER_PAGE;
+            applyPagination();
+
             // Update rank numbers
             updateRankNumbers();
         }
@@ -561,6 +593,60 @@
                 }
             });
         }
+
+        // Load more functionality
+        function applyPagination() {
+            if (isSearching) {
+                // If searching, show all matching results
+                return;
+            }
+
+            const items = document.querySelectorAll('.ranking-item');
+            items.forEach((item, index) => {
+                const isHiddenBySearch = item.classList.contains('hidden-by-search');
+
+                if (!isHiddenBySearch) {
+                    if (index < currentlyDisplayed) {
+                        item.style.display = '';
+                        item.classList.remove('hidden-by-pagination');
+                    } else {
+                        item.style.display = 'none';
+                        item.classList.add('hidden-by-pagination');
+                    }
+                }
+            });
+
+            updateLoadMoreButton();
+        }
+
+        function updateLoadMoreButton() {
+            if (!loadMoreBtn) return;
+
+            const items = document.querySelectorAll('.ranking-item');
+            const visibleItems = Array.from(items).filter(item =>
+                item.style.display !== 'none'
+            );
+            const totalItems = items.length;
+
+            // Hide button if searching or all items are visible
+            if (isSearching || currentlyDisplayed >= totalItems) {
+                loadMoreBtn.style.display = 'none';
+            } else {
+                loadMoreBtn.style.display = 'inline-block';
+            }
+        }
+
+        if (loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', function() {
+                currentlyDisplayed += QUOTES_PER_PAGE;
+                applyPagination();
+            });
+        }
+
+        // Initialize pagination on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            initializePagination();
+        });
 
         // Rating Modal functionality
         const ratingModal = document.getElementById('ratingModal');
