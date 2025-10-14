@@ -26,6 +26,15 @@ app.engine('handlebars', engine({
   helpers: {
       json: (context) => {
           return JSON.stringify(context);
+      },
+      eq: (a, b) => {
+          return a === b;
+      },
+      add: (a, b) => {
+          return a + b;
+      },
+      multiply: (a, b) => {
+          return a * b;
       }
   }
 }));
@@ -200,7 +209,55 @@ app.get('/rate', requireAuth, async (req, res) => {
 app.get('/leaderboard', requireAuth, async (req, res) => {
   try {
     const quotes = await getAllQuotes(); // Fetch all quotes from DynamoDB
-    res.render('leaderboard', { quotes }); // Pass quotes to the template
+
+    // Fetch ratings for each quote and calculate averages
+    const quotesWithRatings = await Promise.all(quotes.map(async (quote) => {
+      const ratingsData = await fetchQuoteRating(quote.message_id);
+
+      let average = 0;
+      let totalRatings = 0;
+      let ratingsArray = [];
+
+      if (ratingsData && ratingsData.ratings && Array.isArray(ratingsData.ratings)) {
+        ratingsArray = ratingsData.ratings;
+        const sum = ratingsArray.reduce((acc, r) => acc + parseInt(r.rating, 10), 0);
+        totalRatings = ratingsArray.length;
+        average = totalRatings > 0 ? (sum / totalRatings).toFixed(1) : 0;
+      }
+
+      return {
+        ...quote,
+        average: parseFloat(average),
+        totalRatings: totalRatings,
+        ratings: ratingsArray
+      };
+    }));
+
+    // Sort by average rating (highest first), then by total ratings as tiebreaker
+    quotesWithRatings.sort((a, b) => {
+      if (b.average !== a.average) {
+        return b.average - a.average;
+      }
+      return b.totalRatings - a.totalRatings;
+    });
+
+    // Calculate stats for dashboard
+    const totalQuotes = quotesWithRatings.length;
+    const totalRatingsCount = quotesWithRatings.reduce((sum, q) => sum + q.totalRatings, 0);
+    const topAverage = quotesWithRatings.length > 0 ? quotesWithRatings[0].average : 0;
+    const mostRated = quotesWithRatings.length > 0
+      ? Math.max(...quotesWithRatings.map(q => q.totalRatings))
+      : 0;
+
+    res.render('leaderboard', {
+      quotes: quotesWithRatings,
+      stats: {
+        totalQuotes,
+        totalRatings: totalRatingsCount,
+        topAverage,
+        mostRated
+      }
+    });
   } catch (error) {
     logger.error('Error fetching quotes:', error);
     res.status(500).send('Error retrieving quotes');
