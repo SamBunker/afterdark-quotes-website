@@ -18,7 +18,7 @@ services:
     networks:
       - d-nginx_default
     logging:
-      driver: gelf
+      driver: syslog
       options:
         syslog-address: "udp://${LOGGING_IP}:1514"
         tag: "afterdark-quotes-website"
